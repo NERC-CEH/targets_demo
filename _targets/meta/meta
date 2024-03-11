@@ -1,0 +1,10 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+.Random.seed|object|5b1f228d030d6038|||||||||||||||
+add_things|function|04ba58d2d1d7e230|||||||||||||||
+data|stem|8d959535952bfd3a|4525b922227c51ac|8404ca5e1f920545|1588979285||t19689.5246328428s|659ddc44026aa935|1548|rds|local|vector|||0.03||
+file|stem|7799ac75e31df2c9|0d4b7516032e01d0|ef46db3751d8e999|-1301001980|data.csv|t19682.5486699097s|cc9e8fe371a7d265|3871|file|local|vector|||0||
+fit_model|function|982677e5c5b1c4d7|||||||||||||||
+get_data|function|caaab029510d896a|||||||||||||||
+model|stem|dd07b7ec406d4ace|f3249b4ecf290e96|34c83fe74b7433ad|1816327236||t19689.5246339695s|1eaa52c6e32a7b9e|113|rds|local|vector|||0||
+plot|stem|eb28d9743465344c|1239c97928298b18|b3cd48882d302612|1931196220||t19689.5246350559s|cd4e373d037467dc|49857|rds|local|vector|||0||
+plot_model|function|9d59031dffad0d19|||||||||||||||

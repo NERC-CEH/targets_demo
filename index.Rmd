@@ -1,0 +1,497 @@
+---
+title: "Reproducible computation at scale in R with {targets}"
+author: Peter Levy (with some slides of Will Landau)
+output: 
+  xaringan::moon_reader:
+    nature:
+      highlightLines: true
+---
+
+<!--- { rendering -->
+```{r rendering, eval=FALSE, include=FALSE}
+library(rmarkdown)
+library(ggplot2)
+# knitr::opts_chunk$set(echo=FALSE, results="asis", warning=FALSE, message=FALSE, cache=FALSE)
+system.time(render("index.Rmd", output_file = "index.html"))
+```
+<!--- } -->
+
+<style>
+.inverse {
+background-color: transparent;
+text-shadow: 0 0 0px transparent;
+}
+.title-slide {
+vertical-align: bottom !important; 
+text-align: center !important;
+}
+.title-slide h1 {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+width: 100%;
+line-height: 4em;
+color: #666666;
+}
+.title-slide h3 {
+line-height: 6em;
+color: #666666;
+}
+.title-slide {
+background-color: white;
+background-image: url('images/logo.png');
+background-repeat: no-repeat;
+background-size: 25%;
+}
+.remark-slide-content:after {
+position: absolute;
+bottom: -5px;
+left: 10px;
+height: 40px;
+width: 100%;
+font-family: Helvetica, Arial, sans-serif;
+font-size: 0.7em;
+color: gray;
+background-repeat: no-repeat;
+background-size: contain;
+}
+</style>
+
+```{r, include = FALSE}
+library(targets)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 10,
+  fig.height = 7,
+  out.width = "80%",
+  out.height = "80%"
+)
+```
+
+## Repetition: the overlooked bane of long computation
+
+<br>
+
+![](./images/reality.png)
+
+---
+
+## Typical Workflow: interconnected tasks
+
+<center>
+<img src = "./images/pipeline1.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+???
+
+A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
+
+---
+
+## Changes
+
+<center>
+<img src = "./images/pipeline2.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+???
+
+If you change any one of these parts - whether it's a bugfix, a tweak to a model, or some new data -
+
+---
+
+## Consequences
+
+<center>
+<img src = "./images/pipeline3.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+???
+
+Then everything that depends on it is no longer valid, and you need to rerun the computation to bring the results back up to date. This is seriously frustrating when you're in development and you're still making a constant stream of changes to code and data in real time. If every change means you need to rerun the project, there's no way the results can keep up...
+
+---
+
+## Changes
+
+<center>
+<img src = "./images/pipeline4.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+---
+
+## Consequences
+
+<center>
+<img src = "./images/pipeline5.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+---
+
+## Changes
+
+<center>
+<img src = "./images/pipeline6.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+---
+
+## Consequences
+
+<center>
+<img src = "./images/pipeline7.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+---
+
+background-image: ./images/not.png
+
+## <img src="./images/no.png" width="40" height="40"> Move away from numbered imperative scripts.
+
+```
+run_everything.R
+R/
+├── 01-read_data.R
+├── 02-wrangle.R
+├── 03-model.R
+├── 04-results.R
+└── 05-plot.R
+└── 07-paper.Rmd
+data/
+└── input_data.csv
+```
+
+### Problems
+
+- computation may take hours or days
+- has anything changed since last run?
+- no guarantees
+- what ramifications?
+
+???
+
+Before we get started, let's talk about the implementation strategy. We're going to move away from numbered scripts and R Markdown as a way to manage the computation end to end. It's an okay strategy for small projects, but it falls apart quickly as a project grows.
+
+---
+
+## Dilemma: short runtimes or reproducible results?
+
+![](./images/decisions.png)
+
+---
+
+## Pipeline tools figure out what to rerun.
+
+![](./images/pipeline_graph.png)
+
+- Define pipeline:
+    - R objects (*targets*) modified by functions
+- Automatic analysis of dependencies
+    - functions, data, files
+- Only runs out-of-date targets
+    - Save time while ensuring computational reproducibility.
+- Ensures computational reproducibility.
+
+
+---
+
+## Pipeline tools
+
+<center>
+<img src="./images/infographic.png" height = "125px">
+</center>
+
+## {targets}
+
+* Fundamentally designed for R.
+* Supports a clean, modular, function-oriented programming style.
+* Abstracts files as R objects and automatically manages data.
+
+---
+
+## Typical minimal project structure
+
+
+```{r, eval = FALSE}
+_targets.R # Required top-level configuration file.
+R/
+└── functions.R #<<
+data/
+└── data.csv
+```
+
+- Not restrictive, many variations on this theme
+- Includes both code and text in markdown/LaTeX
+
+???
+
+You can organize your functions however you want, but it's common practice to put them in scripts inside an R/ folder. Similarly, input datasets can go anywhere, but a data/ folder just helps keep things clean.
+
+And at this point, you have a good clean function-oriented project. Even if you decide not to use targets, this function-oriented style still has a lot of value. However, if you're thinking about using targets, then converting to functions is almost all of the work. Once you've done that, you're already almost there. All you need now is to outline the specific steps of the computation in a formal pipeline. And that's where this _targets.R script comes into play. It always lives at the root of the project, and it's always called "_targets.R".
+
+---
+
+## Define pipeline as a list of targets.
+
+```{r, eval = FALSE}
+# _targets.R
+library(targets)
+tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
+# Run the R scripts in the R/ folder with your custom functions:
+tar_source()
+list(
+  tar_target(file, "data.csv", format = "file"),
+  tar_target(data, get_data(file)),
+  tar_target(model, fit_model(data)),
+  tar_target(plot, plot_model(model, data))
+)
+```
+
+```{r, echo = FALSE}
+tar_script({
+library(targets)
+tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
+# Run the R scripts in the R/ folder with your custom functions:
+tar_source()
+list(
+  tar_target(file, "data.csv", format = "file"),
+  tar_target(data, get_data(file)),
+  tar_target(model, fit_model(data)),
+  tar_target(plot, plot_model(model, data))
+)
+})
+```
+
+???
+
+The purpose of _targets.R is to set up the project at a high level. It loads the packages required to define the pipeline, it loads your custom functions and global objects, it sets high-level options such as the packages the targets are going to need, and it defines the pipeline at the very end.
+
+At the bottom of _targets.R, you list out objects called targets. Each target is an individual step in the workflow. It has an informative name like "sim" or "patients", and it has a R command that invokes your custom functions and returns a value.
+
+---
+
+## targets understands code and data dependencies.
+
+```{r, eval = FALSE}
+tar_visnetwork()
+```
+<center>
+<img src="images/graph5.png", height = "350px" align="middle" style="border: none; box-shadow: none; text-align: center;">
+</center>
+
+
+???
+
+It's always good practice to visualize the dependency graph of the plan. targets has functions to do this for you, and it really demystifies how the package works. So here you see the flow of the project from left to right. We reproducibly track an input data file, we load that data to split into training and test, and we prepare that data for the models using a Tidymodels recipe.
+
+But how does targets deduce this flow? How does it know that the churn_recipe depend on churn_data? The order you write targets in the pipeline does not matter. targets knows that churn_recipe depends on churn_data because the symbol "churn_data" is mentioned in the command for "churn_recipe" in the pipeline. targets scans your commands and functions without actually running them it in order to look for changes and understand dependency relationships. This is called static code analysis.
+
+---
+
+## Build your targets.
+
+```{r, eval = FALSE}
+tar_make()
+```
+
+```{r, echo = FALSE}
+tar_make(callr_function = NULL)
+```
+
+???
+
+To actually run the workflow, we use a function called tar_make(). tar_make() creates a clean new reproducible R process, runs _targets.R to populate the new session and define the pipeline, resolves the dependency graph, runs the correct targets in the correct order from the dependency graph, and writes the return values to storage.
+
+---
+
+## Check the targets produced
+
+- `tar_load()` and `tar_read()` get targets from the `_targets/` data store.
+
+```{r}
+tar_read(plot)
+```
+
+???
+
+Afterwards, all the targets are in storage. There's a special key-value store in a hidden _targets/ folder, and targets has functions tar_load() and tar_read() to retrieve data from the store. targets abstracts artifacts as ordinary objects. You don't need to worry about where these files are located, you just need to know the target names. This is the exploratory analysis phase. Always inspect your targets for issues between calls to tar_make().
+
+---
+
+## Previous work is still up to date.
+
+```{r, eval = FALSE}
+tar_outdated()
+```
+
+```{r, echo = FALSE}
+tar_outdated(reporter = "silent", callr_function = NULL)
+```
+
+```{r, eval = FALSE}
+tar_make()
+```
+
+```{r, echo = FALSE, output = FALSE}
+tar_make(callr_function = NULL)
+```
+
+???
+
+So when we run the pipeline again, only the models run. The tool skips the data targets because they are already up to date.
+
+---
+
+## A real example
+
+```{r, eval = FALSE}
+library(targets)
+library(tarchetypes)
+library(here) # construct file paths relative to project root
+library(fs) # file system operations
+
+library(future) # for parallelisation
+future::plan("multicore")
+v_pkgs <- c("qs", "tidyverse", "readxl", "data.table", "spCEH", "units",
+    "rayshader", "viridis", "scales", "sf", "gridExtra", "MuMIn",
+    "ggforce", "ggeffects", "lme4", "brms", "ConsReg")
+    
+tar_option_set(
+  packages = v_pkgs,
+  format = "qs"
+)
+
+# Functions used by the targets.
+source(here::here("R", "dsdz.R"))
+...
+)
+```
+
+---
+
+## A real example
+
+```{r, eval = FALSE}
+# List of targets
+list(
+  # data files:
+  tar_target(fname_eb_2015, here("data-raw/EasterBush/EB_soil_long_2015_09_23.csv"), format = "file"),
+  tar_target(fname_eb_2012, here("data-raw/EasterBush/EB_soil_core_CN_2012.csv"), format = "file"),
+  tar_target(fname_elum,    here("data-raw/ELUM", "ELUM soil carbon data.xlsx"), format = "file"),
+  tar_target(fname_rac ,    here("data-raw/RAC", "HS2 soil carbon data_additional samples_JUly 2022.xlsx"), format = "file"),
+  tar_target(fname_ward ,   here("data-raw/Ward", "1. FINAL All data at 5 depth increments - Copy.xls"), format = "file"),
+  tar_target(fname_ward_coord, here("data-raw/Ward", "SITE DETAILS 2008.xls"), format = "file"),
+  tar_target(fname_brad, here("data-raw/Bradley", "UK_Soil_Series_2005.csv"), format = "file"),
+  tar_target(fname_brad_summary, here("data-raw/Bradley/Bradley_2005_summary.csv"), format = "file"),
+  tar_target(fname_cs_1978, here("data-raw/CS", "CS1978_SOIL_PHYSICOCHEM.csv"), format = "file"),
+  tar_target(fname_cs_1998, here("data-raw/CS", "CS1998_SOIL_PHYSICOCHEM.csv"), format = "file"),
+  tar_target(fname_cs_2007, here("data-raw/CS", "CS2007_SOIL_PHYSICOCHEM.csv"), format = "file"),
+  tar_target(fname_cs_2019, here("data-raw/CS", "CS2019_20_21_Pete.xlsx"), format = "file"),
+  tar_target(fname_gmep, here("data-raw/GMEP", "GMEP_SOIL_METRICS_2013_16.csv"), format = "file"),
+  
+  # wrangle data files:
+  tar_target(dt_eb  , wrangle_eb(  fname_eb_2015, fname_eb_2012)),
+  tar_target(dt_elum, wrangle_elum(fname_elum)),
+  tar_target(dt_rac , wrangle_rac(fname_rac)),
+  tar_target(dt_ward, wrangle_ward(fname_ward, fname_ward_coord)),
+  tar_target(dt_brad, wrangle_brad(fname_brad)),
+  tar_target(dt_cs ,  wrangle_cs(fname_cs_1978, fname_cs_1998, fname_cs_2007)),
+```
+
+---
+
+## A real example
+
+```{r, eval = FALSE}
+  tar_target(dt_cs2019, wrangle_cs2019(fname_cs_2019)),
+  tar_target(dt_gmep, wrangle_gmep(fname_gmep)),
+  tar_target(dt_all , rbind(dt_eb, dt_elum, dt_rac, dt_ward, dt_brad, 
+    dt_cs, dt_cs2019, dt_gmep)),
+  tar_target(dt, amend_dt(dt_all)),
+
+  # produce graphics files for figures:
+  tar_target(fname_depth_bySurvey, plot_depths(dt), format = "file"),
+  tar_target(fname_maps, plot_maps(dt), format = "file"),
+  tar_target(fname_rhoc_vs_depth, plot_rhoc_vs_depth(dt), format = "file"),
+  tar_target(fname_examples, plot_examples(dt), format = "file"),
+  tar_target(fname_single_core, plot_on_all_scales_single_core(
+    dt[core_id == "EB_2004_18"]), format = "file"),
+  tar_target(fname_log_or_not, plot_on_all_scales(
+    dt[survey == "ELUM" | survey == "Ward" | survey == "Easter Bush"]), format = "file"),
+  tar_target(m_lmer, estimate_lu_effect_all_data(dt)),
+  tar_target(v_fnames_model_fit, plot_lu_effect_all_data(dt, m_lmer), format = "file"),
+  # tar_target(fname_lu_effect, estimate_lu_effect_by_survey(dt), format = "file"),
+  tar_target(tab_brad, tabulate_cf_Bradley(m_lmer, fname_brad_summary)),
+  tar_target(fname_fc_vsYear_cs, analyse_cs(dt), format = "file"),
+...
+```
+
+---
+
+## A real example
+
+```{r, eval = FALSE}
+...
+
+  # manuscript file:
+  tar_render(manuscript_pdf, here("manuscripts/copernicus", "dsdz_cop.Rmd"), 
+    params = list(
+      fname_maps = fname_maps,
+      fname_examples = fname_examples,
+      fname_rhoc_vs_depth = fname_rhoc_vs_depth,
+      fname_Sc_byU = v_fnames_model_fit[3],
+      # fname_lu_effect = fname_lu_effect
+      fname_lu_effect = here("manuscripts", "p_Sprime_byU_bySurvey.pdf")
+    ))
+)
+```
+
+---
+
+## A real example
+
+<center>
+<img src="./images/dsdz_targets.png">
+</center>
+
+---
+
+## The output
+
+<center>
+<img src="./images/bgc_paper.png">
+</center>
+
+---
+
+## The output
+
+<center>
+<img src="./images/bgc_paper_end.png">
+</center>
+
+---
+
+## Resources
+
+* Get [`targets`](https://github.com/ropensci/targets):
+
+```{r, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+```
+
+* Tutorial materials: <https://github.com/wlandau/targets-tutorial>
+* Development repository: <https://github.com/ropensci/targets>
+* Full user manual: <https://books.ropensci.org/targets/>
+* Reference website: <https://docs.ropensci.org/targets/>
+
+???
+
+There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
+
+targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
