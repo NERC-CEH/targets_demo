@@ -101,10 +101,10 @@ background-size: 300pt
 - write some explanation
 --
 
-- forget what you actually did
+- *forget what you actually did*
 --
 
-- re-do from scratch a month later
+- *re-do from scratch a month later*
 --
 
 
@@ -123,7 +123,7 @@ background-size: 300pt
 
 ???
 
-If you change any one of these parts - whether it's a bugfix, a tweak to a model, or some new data -
+If you change any one of these parts - whether it is a bugfix, a tweak to a model, or some new data -
 
 ---
 
@@ -135,7 +135,7 @@ If you change any one of these parts - whether it's a bugfix, a tweak to a model
 
 ???
 
-Then everything that depends on it is no longer valid, and you need to rerun the computation to bring the results back up to date. This is seriously frustrating when you're in development and you're still making a constant stream of changes to code and data in real time. If every change means you need to rerun the project, there's no way the results can keep up...
+Then everything that depends on it is no longer valid, and you need to rerun the computation to bring the results back up to date. This is seriously frustrating when you're in development and you're still making a constant stream of changes to code and data in real time. If every change means you need to rerun the project, there is no way the results can keep up...
 
 ---
 
@@ -171,6 +171,36 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 ---
 
+## A more structured workflow ...
+
+```
+run_everything.R
+R/
+├── 01-read_data.R
+├── 02-wrangle.R
+├── 03-model.R
+├── 04-results.R
+└── 05-plot.R
+└── 06-paper.Rmd
+data/
+└── input_data.csv
+```
+
+--
+
+### Problems
+
+- computation may take hours or days
+- has anything changed since last run?
+- no guarantees
+- what ramifications?
+
+???
+
+Move away from numbered scripts and R Markdown as a way to manage the computation end to end. It is an okay strategy for small projects, but it falls apart quickly as a project grows.
+
+---
+
 background-image: ./images/not.png
 
 ## &lt;img src="./images/no.png" width="40" height="40"&gt; A more structured workflow ...
@@ -195,10 +225,6 @@ data/
 - no guarantees
 - what ramifications?
 
-???
-
-Before we get started, let's talk about the implementation strategy. We're going to move away from numbered scripts and R Markdown as a way to manage the computation end to end. It's an okay strategy for small projects, but it falls apart quickly as a project grows.
-
 ---
 
 ## Dilemma: short runtimes or reproducible results?
@@ -207,7 +233,19 @@ Before we get started, let's talk about the implementation strategy. We're going
 
 ---
 
-## Pipeline tools figure out what to rerun.
+class: middle, bottom
+background-image: url(./images/logo.png)
+background-size: contain
+
+---
+
+## {targets}: formally declare structure of workflow
+
+![](./images/pipeline1.png)
+
+---
+
+## {targets}: formally declare structure of workflow
 
 ![](./images/pipeline_graph.png)
 
@@ -215,20 +253,18 @@ Before we get started, let's talk about the implementation strategy. We're going
     - R objects (*targets*) modified by functions
 - Automatic analysis of dependencies
     - functions, data, files
-- Only runs out-of-date targets
-    - Save time while ensuring computational reproducibility.
+- Figures out what to re-run.
+    - Only runs out-of-date targets
 - Ensures computational reproducibility.
-
 
 ---
 
-## Pipeline tools
+## {targets}
 
 &lt;center&gt;
 &lt;img src="./images/infographic.png" height = "125px"&gt;
 &lt;/center&gt;
 
-## {targets}
 
 * Fundamentally designed for R.
 * Supports a clean, modular, function-oriented programming style.
@@ -316,7 +352,7 @@ tar_make()
 #&gt; &lt;U+2714&gt; skipped target data
 #&gt; &lt;U+2714&gt; skipped target model
 #&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.16 seconds]
+#&gt; &lt;U+2714&gt; skipped pipeline [0.13 seconds]
 ```
 
 ???
@@ -365,7 +401,7 @@ tar_make()
 #&gt; &lt;U+2714&gt; skipped target data
 #&gt; &lt;U+2714&gt; skipped target model
 #&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.16 seconds]
+#&gt; &lt;U+2714&gt; skipped pipeline [0.1 seconds]
 ```
 
 ???
@@ -528,6 +564,23 @@ remotes::install_github("ropensci/targets")
 There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
 
 targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
+
+---
+
+## Advanced topics
+
+- use with Rmarkdown
+- branching
+- parallelisation
+
+---
+
+## Next
+
+- practical demo
+- break
+- more advanced examples
+- ...
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
