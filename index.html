@@ -3,7 +3,7 @@
   <head>
     <title>Reproducible computation at scale in R with {targets}</title>
     <meta charset="utf-8" />
-    <meta name="author" content="Peter Levy (with some slides of Will Landau)" />
+    <meta name="author" content="Peter Levy, UKCEH Edinburgh" />
     <script src="index_files/header-attrs-2.25/header-attrs.js"></script>
     <link href="index_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="index_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
@@ -16,7 +16,7 @@ class: center, middle, inverse, title-slide
 # Reproducible computation at scale in R with {targets}
 ]
 .author[
-### Peter Levy (with some slides of Will Landau)
+### Peter Levy, UKCEH Edinburgh
 ]
 
 ---
@@ -70,15 +70,7 @@ background-size: contain;
 
 
 
-## Repetition: the overlooked bane of long computation
-
-&lt;br&gt;
-
-![](./images/reality.png)
-
----
-
-## Typical Workflow: interconnected tasks
+## A Workflow: interconnected tasks
 
 &lt;center&gt;
 &lt;img src = "./images/pipeline1.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
@@ -89,6 +81,39 @@ background-size: contain;
 A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
 
 ---
+background-image: url("./images/pipeline1.png")
+background-position: 90% 50%
+background-size: 300pt
+
+## A more typical unstructured workflow
+- get some data
+--
+
+- write some code
+--
+
+- produce graphs &amp; tables
+--
+
+- paste into Word document
+--
+
+- write some explanation
+--
+
+- forget what you actually did
+--
+
+- re-do from scratch a month later
+--
+
+
+
+**No declared structure**
+
+**Dependencies not obvious**
+---
+
 
 ## Changes
 
@@ -102,7 +127,7 @@ If you change any one of these parts - whether it's a bugfix, a tweak to a model
 
 ---
 
-## Consequences
+## Consequences?
 
 &lt;center&gt;
 &lt;img src = "./images/pipeline3.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
@@ -122,7 +147,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 ---
 
-## Consequences
+## Consequences?
 
 &lt;center&gt;
 &lt;img src = "./images/pipeline5.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
@@ -138,7 +163,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 ---
 
-## Consequences
+## Consequences?
 
 &lt;center&gt;
 &lt;img src = "./images/pipeline7.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
@@ -148,7 +173,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 background-image: ./images/not.png
 
-## &lt;img src="./images/no.png" width="40" height="40"&gt; Move away from numbered imperative scripts.
+## &lt;img src="./images/no.png" width="40" height="40"&gt; A more structured workflow ...
 
 ```
 run_everything.R
@@ -158,7 +183,7 @@ R/
 ├── 03-model.R
 ├── 04-results.R
 └── 05-plot.R
-└── 07-paper.Rmd
+└── 06-paper.Rmd
 data/
 └── input_data.csv
 ```
@@ -251,8 +276,6 @@ list(
 )
 ```
 
-
-
 ???
 
 The purpose of _targets.R is to set up the project at a high level. It loads the packages required to define the pipeline, it loads your custom functions and global objects, it sets high-level options such as the packages the targets are going to need, and it defines the pipeline at the very end.
@@ -289,11 +312,11 @@ tar_make()
 
 
 ```
-#&gt; &lt;U+2714&gt; skip target file
-#&gt; &lt;U+2714&gt; skip target data
-#&gt; &lt;U+2714&gt; skip target model
-#&gt; &lt;U+2714&gt; skip target plot
-#&gt; &lt;U+2714&gt; skip pipeline [0.25 seconds]
+#&gt; &lt;U+2714&gt; skipped target file
+#&gt; &lt;U+2714&gt; skipped target data
+#&gt; &lt;U+2714&gt; skipped target model
+#&gt; &lt;U+2714&gt; skipped target plot
+#&gt; &lt;U+2714&gt; skipped pipeline [0.16 seconds]
 ```
 
 ???
@@ -311,7 +334,7 @@ To actually run the workflow, we use a function called tar_make(). tar_make() cr
 tar_read(plot)
 ```
 
-&lt;img src="index_files/figure-html/unnamed-chunk-8-1.png" width="80%" height="80%" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-3-1.png" width="80%" height="80%" style="display: block; margin: auto;" /&gt;
 
 ???
 
@@ -338,11 +361,11 @@ tar_make()
 
 
 ```
-#&gt; &lt;U+2714&gt; skip target file
-#&gt; &lt;U+2714&gt; skip target data
-#&gt; &lt;U+2714&gt; skip target model
-#&gt; &lt;U+2714&gt; skip target plot
-#&gt; &lt;U+2714&gt; skip pipeline [0.18 seconds]
+#&gt; &lt;U+2714&gt; skipped target file
+#&gt; &lt;U+2714&gt; skipped target data
+#&gt; &lt;U+2714&gt; skipped target model
+#&gt; &lt;U+2714&gt; skipped target plot
+#&gt; &lt;U+2714&gt; skipped pipeline [0.16 seconds]
 ```
 
 ???

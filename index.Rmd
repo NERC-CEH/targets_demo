@@ -1,6 +1,6 @@
 ---
 title: "Reproducible computation at scale in R with {targets}"
-author: Peter Levy (with some slides of Will Landau)
+author: Peter Levy, UKCEH Edinburgh
 output: 
   xaringan::moon_reader:
     nature:
@@ -58,7 +58,7 @@ background-size: contain;
 }
 </style>
 
-```{r, include = FALSE}
+```{r c1, include = FALSE}
 library(targets)
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -72,15 +72,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Repetition: the overlooked bane of long computation
-
-<br>
-
-![](./images/reality.png)
-
----
-
-## Typical Workflow: interconnected tasks
+## A Workflow: interconnected tasks
 
 <center>
 <img src = "./images/pipeline1.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
@@ -91,6 +83,39 @@ knitr::opts_chunk$set(
 A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
 
 ---
+background-image: url("./images/pipeline1.png")
+background-position: 90% 50%
+background-size: 300pt
+
+## A more typical unstructured workflow
+- get some data
+--
+
+- write some code
+--
+
+- produce graphs & tables
+--
+
+- paste into Word document
+--
+
+- write some explanation
+--
+
+- forget what you actually did
+--
+
+- re-do from scratch a month later
+--
+
+
+
+**No declared structure**
+
+**Dependencies not obvious**
+---
+
 
 ## Changes
 
@@ -104,7 +129,7 @@ If you change any one of these parts - whether it's a bugfix, a tweak to a model
 
 ---
 
-## Consequences
+## Consequences?
 
 <center>
 <img src = "./images/pipeline3.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
@@ -124,7 +149,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 ---
 
-## Consequences
+## Consequences?
 
 <center>
 <img src = "./images/pipeline5.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
@@ -140,7 +165,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 ---
 
-## Consequences
+## Consequences?
 
 <center>
 <img src = "./images/pipeline7.png" align="middle" style="border: none; box-shadow: none; text-align: center;">
@@ -150,7 +175,7 @@ Then everything that depends on it is no longer valid, and you need to rerun the
 
 background-image: ./images/not.png
 
-## <img src="./images/no.png" width="40" height="40"> Move away from numbered imperative scripts.
+## <img src="./images/no.png" width="40" height="40"> A more structured workflow ...
 
 ```
 run_everything.R
@@ -160,7 +185,7 @@ R/
 ├── 03-model.R
 ├── 04-results.R
 └── 05-plot.R
-└── 07-paper.Rmd
+└── 06-paper.Rmd
 data/
 └── input_data.csv
 ```
@@ -216,7 +241,7 @@ Before we get started, let's talk about the implementation strategy. We're going
 ## Typical minimal project structure
 
 
-```{r, eval = FALSE}
+```{r c2, eval = FALSE}
 _targets.R # Required top-level configuration file.
 R/
 └── functions.R #<<
@@ -237,7 +262,7 @@ And at this point, you have a good clean function-oriented project. Even if you 
 
 ## Define pipeline as a list of targets.
 
-```{r, eval = FALSE}
+```{r c3, eval = FALSE}
 # _targets.R
 library(targets)
 tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
@@ -251,21 +276,6 @@ list(
 )
 ```
 
-```{r, echo = FALSE}
-tar_script({
-library(targets)
-tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
-# Run the R scripts in the R/ folder with your custom functions:
-tar_source()
-list(
-  tar_target(file, "data.csv", format = "file"),
-  tar_target(data, get_data(file)),
-  tar_target(model, fit_model(data)),
-  tar_target(plot, plot_model(model, data))
-)
-})
-```
-
 ???
 
 The purpose of _targets.R is to set up the project at a high level. It loads the packages required to define the pipeline, it loads your custom functions and global objects, it sets high-level options such as the packages the targets are going to need, and it defines the pipeline at the very end.
@@ -276,7 +286,7 @@ At the bottom of _targets.R, you list out objects called targets. Each target is
 
 ## targets understands code and data dependencies.
 
-```{r, eval = FALSE}
+```{r c5, eval = FALSE}
 tar_visnetwork()
 ```
 <center>
