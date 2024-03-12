@@ -85,7 +85,7 @@ background-image: url("./images/pipeline1.png")
 background-position: 90% 50%
 background-size: 300pt
 
-## A more typical unstructured workflow
+## A more typical unstructured manual workflow
 - get some data
 --
 
@@ -98,13 +98,19 @@ background-size: 300pt
 - paste into Word document
 --
 
-- write some explanation
+- write some text
+--
+
+- 
+--
+
+- *come back a month later*
 --
 
 - *forget what you actually did*
 --
 
-- *re-do from scratch a month later*
+- *re-run? re-do from scratch?*
 --
 
 
@@ -266,9 +272,13 @@ background-size: contain
 &lt;/center&gt;
 
 
-* Fundamentally designed for R.
-* Supports a clean, modular, function-oriented programming style.
-* Abstracts files as R objects and automatically manages data.
+* Supports (enforces) a function-oriented programming style
+* Automatically manages data
+
+* Fundamentally designed for R
+* Options available for python:
+    - `snakemake`
+    - ...
 
 ---
 
@@ -352,7 +362,7 @@ tar_make()
 #&gt; &lt;U+2714&gt; skipped target data
 #&gt; &lt;U+2714&gt; skipped target model
 #&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.13 seconds]
+#&gt; &lt;U+2714&gt; skipped pipeline [0.14 seconds]
 ```
 
 ???
@@ -401,12 +411,93 @@ tar_make()
 #&gt; &lt;U+2714&gt; skipped target data
 #&gt; &lt;U+2714&gt; skipped target model
 #&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.1 seconds]
+#&gt; &lt;U+2714&gt; skipped pipeline [0.11 seconds]
 ```
 
 ???
 
 So when we run the pipeline again, only the models run. The tool skips the data targets because they are already up to date.
+
+---
+
+## Resources
+
+* Get [`targets`](https://github.com/ropensci/targets):
+
+
+```r
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+```
+
+* Tutorial materials: &lt;https://github.com/wlandau/targets-tutorial&gt;
+* Development repository: &lt;https://github.com/ropensci/targets&gt;
+* Full user manual: &lt;https://books.ropensci.org/targets/&gt;
+* Reference website: &lt;https://docs.ropensci.org/targets/&gt;
+
+* These slides: &lt;https://github.com/NERC-CEH/targets_demo&gt;
+
+???
+
+There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
+
+targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
+
+---
+
+## Next
+
+- practical demo
+- break
+- more advanced examples
+- ...
+
+---
+
+## Advanced topics
+
+- parallelisation
+- use with Rmarkdown
+- branching
+
+---
+
+## Parallelisation
+
+- {targets} understands inter-dependence
+- works out which be run in parallel
+- several options
+     - `future` package is easiest
+
+
+```r
+library(future)
+future::plan("multicore")
+```
+
+Run targets objects in parallel with 6 processora:
+
+
+```r
+tar_make_future(workers = 6L)
+```
+---
+
+## Use with Rmarkdown
+
+Include target objects in markdown document with:
+
+
+```r
+tar_read(target_name)
+```
+
+Include rendering of markdown in pipeline with:
+
+
+```r
+tar_render(target_name, filename.Rmd)
+```
 
 ---
 
@@ -503,8 +594,6 @@ list(
 
 
 ```r
-...
-
   # manuscript file:
   tar_render(manuscript_pdf, here("manuscripts/copernicus", "dsdz_cop.Rmd"), 
     params = list(
@@ -541,46 +630,6 @@ list(
 &lt;center&gt;
 &lt;img src="./images/bgc_paper_end.png"&gt;
 &lt;/center&gt;
-
----
-
-## Resources
-
-* Get [`targets`](https://github.com/ropensci/targets):
-
-
-```r
-install.packages("remotes")
-remotes::install_github("ropensci/targets")
-```
-
-* Tutorial materials: &lt;https://github.com/wlandau/targets-tutorial&gt;
-* Development repository: &lt;https://github.com/ropensci/targets&gt;
-* Full user manual: &lt;https://books.ropensci.org/targets/&gt;
-* Reference website: &lt;https://docs.ropensci.org/targets/&gt;
-
-???
-
-There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
-
-targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
-
----
-
-## Advanced topics
-
-- use with Rmarkdown
-- branching
-- parallelisation
-
----
-
-## Next
-
-- practical demo
-- break
-- more advanced examples
-- ...
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

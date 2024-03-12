@@ -86,7 +86,7 @@ background-image: url("./images/pipeline1.png")
 background-position: 90% 50%
 background-size: 300pt
 
-## A more typical unstructured workflow
+## A more typical unstructured manual workflow
 - get some data
 --
 
@@ -99,13 +99,19 @@ background-size: 300pt
 - paste into Word document
 --
 
-- write some explanation
+- write some text
+--
+
+- 
+--
+
+- *come back a month later*
 --
 
 - *forget what you actually did*
 --
 
-- *re-do from scratch a month later*
+- *re-run? re-do from scratch?*
 --
 
 
@@ -267,9 +273,13 @@ background-size: contain
 </center>
 
 
-* Fundamentally designed for R.
-* Supports a clean, modular, function-oriented programming style.
-* Abstracts files as R objects and automatically manages data.
+* Supports (enforces) a function-oriented programming style
+* Automatically manages data
+
+* Fundamentally designed for R
+* Options available for python:
+    - `snakemake`
+    - ...
 
 ---
 
@@ -391,6 +401,82 @@ So when we run the pipeline again, only the models run. The tool skips the data 
 
 ---
 
+## Resources
+
+* Get [`targets`](https://github.com/ropensci/targets):
+
+```{r, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+```
+
+* Tutorial materials: <https://github.com/wlandau/targets-tutorial>
+* Development repository: <https://github.com/ropensci/targets>
+* Full user manual: <https://books.ropensci.org/targets/>
+* Reference website: <https://docs.ropensci.org/targets/>
+
+* These slides: <https://github.com/NERC-CEH/targets_demo>
+
+???
+
+There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
+
+targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
+
+---
+
+## Next
+
+- practical demo
+- break
+- more advanced examples
+- ...
+
+---
+
+## Advanced topics
+
+- parallelisation
+- use with Rmarkdown
+- branching
+
+---
+
+## Parallelisation
+
+- {targets} understands inter-dependence
+- works out which be run in parallel
+- several options
+     - `future` package is easiest
+
+```{r, eval = FALSE}
+library(future)
+future::plan("multicore")
+```
+
+Run targets objects in parallel with 6 processora:
+
+```{r, eval = FALSE}
+tar_make_future(workers = 6L)
+```
+---
+
+## Use with Rmarkdown
+
+Include target objects in markdown document with:
+
+```{r, eval = FALSE}
+tar_read(target_name)
+```
+
+Include rendering of markdown in pipeline with:
+
+```{r, eval = FALSE}
+tar_render(target_name, filename.Rmd)
+```
+
+---
+
 ## A real example
 
 ```{r, eval = FALSE}
@@ -480,8 +566,6 @@ list(
 ## A real example
 
 ```{r, eval = FALSE}
-...
-
   # manuscript file:
   tar_render(manuscript_pdf, here("manuscripts/copernicus", "dsdz_cop.Rmd"), 
     params = list(
@@ -518,42 +602,3 @@ list(
 <center>
 <img src="./images/bgc_paper_end.png">
 </center>
-
----
-
-## Resources
-
-* Get [`targets`](https://github.com/ropensci/targets):
-
-```{r, eval = FALSE}
-install.packages("remotes")
-remotes::install_github("ropensci/targets")
-```
-
-* Tutorial materials: <https://github.com/wlandau/targets-tutorial>
-* Development repository: <https://github.com/ropensci/targets>
-* Full user manual: <https://books.ropensci.org/targets/>
-* Reference website: <https://docs.ropensci.org/targets/>
-
-???
-
-There are several resources to learn about targets. There's a reference website, an online user manual, and a repository with the example code from today.
-
-targets is nearing the end of its beta phase. I am about to submit it to rOpenSci for peer review, and I hope to have it on CRAN at the end of this year or early next year. Now is a great time for feedback because there is no formal release yet and the interface is not yet set in stone.
-
----
-
-## Advanced topics
-
-- use with Rmarkdown
-- branching
-- parallelisation
-
----
-
-## Next
-
-- practical demo
-- break
-- more advanced examples
-- ...

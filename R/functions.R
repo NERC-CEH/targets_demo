@@ -1,12 +1,14 @@
 # R/functions.R
 get_data <- function(file) {
-  read_csv(file, col_types = cols()) %>%
+  df <- read_csv(file, col_types = cols()) %>%
     filter(!is.na(Ozone))
+  return(df)
 }
 
 fit_model <- function(data) {
-  lm(Ozone ~ Temp, data) %>%
+  m <- lm(Ozone ~ Temp, data) %>%
     coefficients()
+  return(m)
 }
 
 plot_model <- function(model, data) {
