@@ -70,22 +70,15 @@ background-size: contain;
 
 
 
-## A Workflow: interconnected tasks
-
-&lt;center&gt;
-&lt;img src = "./images/pipeline1.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
-&lt;/center&gt;
-
-???
-
-A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
-
 ---
 background-image: url("./images/unstructured.png")
 background-position: 90% 50%
 background-size: 300pt
 
-## A more typical unstructured manual workflow
+## A typical unstructured manual workflow
+
+--
+
 - get some data
 --
 
@@ -118,8 +111,20 @@ background-size: 300pt
 **No declared structure**
 
 **Dependencies not obvious**
+
 ---
 
+## A Workflow: interconnected tasks
+
+&lt;center&gt;
+&lt;img src = "./images/pipeline1.png" align="middle" style="border: none; box-shadow: none; text-align: center;"&gt;
+&lt;/center&gt;
+
+???
+
+A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
+
+---
 
 ## Changes
 
@@ -378,9 +383,11 @@ tar_make()
 #&gt; ● completed target filename [0 seconds]
 #&gt; ▶ dispatched target data
 #&gt; New names:
-#&gt; ● completed target data [0.04 seconds]
-#&gt; ✔ skipped target model ✔ skipped target plot
-#&gt; ▶ ended pipeline [0.23 seconds]
+#&gt; ● completed target data [0.06 seconds]
+#&gt; ▶ dispatched target model ● completed target model [0 seconds]
+#&gt; ▶ dispatched target plot
+#&gt; ● completed target plot [0.02 seconds]
+#&gt; ▶ ended pipeline [0.42 seconds]
 #&gt; • `` -&gt; `...1`
 ```
 
@@ -430,7 +437,7 @@ tar_make()
 #&gt; ✔ skipped target data
 #&gt; ✔ skipped target model
 #&gt; ✔ skipped target plot
-#&gt; ✔ skipped pipeline [0.14 seconds]
+#&gt; ✔ skipped pipeline [0.15 seconds]
 ```
 
 ???
