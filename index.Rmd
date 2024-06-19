@@ -1,6 +1,6 @@
 ---
-title: "Reproducible computation at scale in R with {targets}"
-author: Peter Levy, UKCEH Edinburgh
+title: "{targets}: a data pipeline tool for R"
+author: "Peter Levy, UKCEH Edinburgh"
 output: 
   xaringan::moon_reader:
     nature:
@@ -82,7 +82,7 @@ knitr::opts_chunk$set(
 A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
 
 ---
-background-image: url("./images/pipeline1.png")
+background-image: url("./images/unstructured.png")
 background-position: 90% 50%
 background-size: 300pt
 
@@ -286,16 +286,15 @@ background-size: contain
 ## Typical minimal project structure
 
 
-```{r c2, eval = FALSE}
-_targets.R # Required top-level configuration file.
+```{r c2a, eval = FALSE}
+_targets.R # Required top-level configuration file #<<
 R/
-└── functions.R #<<
+└── functions.R
 data/
 └── data.csv
 ```
 
 - Not restrictive, many variations on this theme
-- Includes both code and text in markdown/LaTeX
 
 ???
 
@@ -305,7 +304,23 @@ And at this point, you have a good clean function-oriented project. Even if you 
 
 ---
 
-## Define pipeline as a list of targets.
+## Typical minimal project structure
+
+
+```{r c2b, eval = FALSE}
+_targets.R # Required top-level configuration file
+R/
+└── functions.R #<<
+data/
+└── data.csv
+```
+
+- Not restrictive, many variations on this theme
+- Can include both code and text in markdown/LaTeX
+
+---
+
+## Define pipeline as a list of targets
 
 ```{r c3, eval = FALSE}
 # _targets.R
@@ -314,8 +329,8 @@ tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source()
 list(
-  tar_target(file, "data.csv", format = "file"),
-  tar_target(data, get_data(file)),
+  tar_target(filename, "data.csv", format = "file"),
+  tar_target(data, get_data(filename)),
   tar_target(model, fit_model(data)),
   tar_target(plot, plot_model(model, data))
 )
@@ -425,27 +440,24 @@ targets is nearing the end of its beta phase. I am about to submit it to rOpenSc
 
 ---
 
-## Next
-
-- practical demo
-- break
-- more advanced examples
-- ...
-
----
-
 ## Advanced topics
 
-- parallelisation
-- use with Rmarkdown
-- branching
+- Parallelisation
+- Use with Rmarkdown
+
+- 'Projects' - inter-linked pipelines
+- Branching - targets generated dynamically at run time
 
 ---
 
 ## Parallelisation
 
+<center>
+<img src="./images/pipeline_graph.png" height = "200px">
+</center>
+
 - {targets} understands inter-dependence
-- works out which be run in parallel
+- works out which can be run in parallel
 - several options
      - `future` package is easiest
 
@@ -454,25 +466,26 @@ library(future)
 future::plan("multicore")
 ```
 
-Run targets objects in parallel with 6 processora:
+Run targets objects in parallel with 3 processors:
 
 ```{r, eval = FALSE}
-tar_make_future(workers = 6L)
+tar_make_future(workers = 3L)
 ```
+
 ---
 
 ## Use with Rmarkdown
-
-Include target objects in markdown document with:
-
-```{r, eval = FALSE}
-tar_read(target_name)
-```
 
 Include rendering of markdown in pipeline with:
 
 ```{r, eval = FALSE}
 tar_render(target_name, filename.Rmd)
+```
+
+Include target objects in markdown document with:
+
+```{r, eval = FALSE}
+tar_read(target_name)
 ```
 
 ---
@@ -602,3 +615,21 @@ list(
 <center>
 <img src="./images/bgc_paper_end.png">
 </center>
+
+---
+
+## Resources
+
+* Get [`targets`](https://github.com/ropensci/targets):
+
+```{r, eval = FALSE}
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+```
+
+* Tutorial materials: <https://github.com/wlandau/targets-tutorial>
+* Development repository: <https://github.com/ropensci/targets>
+* Full user manual: <https://books.ropensci.org/targets/>
+* Reference website: <https://docs.ropensci.org/targets/>
+
+* These slides: <https://github.com/NERC-CEH/targets_demo>

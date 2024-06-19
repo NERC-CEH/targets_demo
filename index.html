@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="" xml:lang="">
   <head>
-    <title>Reproducible computation at scale in R with {targets}</title>
+    <title>{targets}: a data pipeline tool for R</title>
     <meta charset="utf-8" />
     <meta name="author" content="Peter Levy, UKCEH Edinburgh" />
-    <script src="index_files/header-attrs-2.25/header-attrs.js"></script>
+    <script src="index_files/header-attrs-2.26/header-attrs.js"></script>
     <link href="index_files/remark-css-0.0.1/default.css" rel="stylesheet" />
     <link href="index_files/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
   </head>
@@ -13,7 +13,7 @@
 class: center, middle, inverse, title-slide
 
 .title[
-# Reproducible computation at scale in R with {targets}
+# {targets}: a data pipeline tool for R
 ]
 .author[
 ### Peter Levy, UKCEH Edinburgh
@@ -81,7 +81,7 @@ background-size: contain;
 A large workflow has a large number of moving parts. We have datasets that we preprocess or simulate, analyses of those datasets, and summaries of the analyses.
 
 ---
-background-image: url("./images/pipeline1.png")
+background-image: url("./images/unstructured.png")
 background-position: 90% 50%
 background-size: 300pt
 
@@ -287,15 +287,14 @@ background-size: contain
 
 
 ```r
-_targets.R # Required top-level configuration file.
+*_targets.R # Required top-level configuration file
 R/
-*└── functions.R
+└── functions.R
 data/
 └── data.csv
 ```
 
 - Not restrictive, many variations on this theme
-- Includes both code and text in markdown/LaTeX
 
 ???
 
@@ -305,7 +304,24 @@ And at this point, you have a good clean function-oriented project. Even if you 
 
 ---
 
-## Define pipeline as a list of targets.
+## Typical minimal project structure
+
+
+
+```r
+_targets.R # Required top-level configuration file
+R/
+*└── functions.R
+data/
+└── data.csv
+```
+
+- Not restrictive, many variations on this theme
+- Can include both code and text in markdown/LaTeX
+
+---
+
+## Define pipeline as a list of targets
 
 
 ```r
@@ -315,8 +331,8 @@ tar_option_set(packages = c("readr", "dplyr", "ggplot2"))
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source()
 list(
-  tar_target(file, "data.csv", format = "file"),
-  tar_target(data, get_data(file)),
+  tar_target(filename, "data.csv", format = "file"),
+  tar_target(data, get_data(filename)),
   tar_target(model, fit_model(data)),
   tar_target(plot, plot_model(model, data))
 )
@@ -358,11 +374,14 @@ tar_make()
 
 
 ```
-#&gt; &lt;U+2714&gt; skipped target file
-#&gt; &lt;U+2714&gt; skipped target data
-#&gt; &lt;U+2714&gt; skipped target model
-#&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.14 seconds]
+#&gt; ▶ dispatched target filename
+#&gt; ● completed target filename [0 seconds]
+#&gt; ▶ dispatched target data
+#&gt; New names:
+#&gt; ● completed target data [0.04 seconds]
+#&gt; ✔ skipped target model ✔ skipped target plot
+#&gt; ▶ ended pipeline [0.23 seconds]
+#&gt; • `` -&gt; `...1`
 ```
 
 ???
@@ -407,11 +426,11 @@ tar_make()
 
 
 ```
-#&gt; &lt;U+2714&gt; skipped target file
-#&gt; &lt;U+2714&gt; skipped target data
-#&gt; &lt;U+2714&gt; skipped target model
-#&gt; &lt;U+2714&gt; skipped target plot
-#&gt; &lt;U+2714&gt; skipped pipeline [0.11 seconds]
+#&gt; ✔ skipped target filename
+#&gt; ✔ skipped target data
+#&gt; ✔ skipped target model
+#&gt; ✔ skipped target plot
+#&gt; ✔ skipped pipeline [0.14 seconds]
 ```
 
 ???
@@ -445,27 +464,24 @@ targets is nearing the end of its beta phase. I am about to submit it to rOpenSc
 
 ---
 
-## Next
-
-- practical demo
-- break
-- more advanced examples
-- ...
-
----
-
 ## Advanced topics
 
-- parallelisation
-- use with Rmarkdown
-- branching
+- Parallelisation
+- Use with Rmarkdown
+
+- 'Projects' - inter-linked pipelines
+- Branching - targets generated dynamically at run time
 
 ---
 
 ## Parallelisation
 
+&lt;center&gt;
+&lt;img src="./images/pipeline_graph.png" height = "200px"&gt;
+&lt;/center&gt;
+
 - {targets} understands inter-dependence
-- works out which be run in parallel
+- works out which can be run in parallel
 - several options
      - `future` package is easiest
 
@@ -475,28 +491,29 @@ library(future)
 future::plan("multicore")
 ```
 
-Run targets objects in parallel with 6 processora:
+Run targets objects in parallel with 3 processors:
 
 
 ```r
-tar_make_future(workers = 6L)
+tar_make_future(workers = 3L)
 ```
+
 ---
 
 ## Use with Rmarkdown
-
-Include target objects in markdown document with:
-
-
-```r
-tar_read(target_name)
-```
 
 Include rendering of markdown in pipeline with:
 
 
 ```r
 tar_render(target_name, filename.Rmd)
+```
+
+Include target objects in markdown document with:
+
+
+```r
+tar_read(target_name)
 ```
 
 ---
@@ -630,6 +647,25 @@ list(
 &lt;center&gt;
 &lt;img src="./images/bgc_paper_end.png"&gt;
 &lt;/center&gt;
+
+---
+
+## Resources
+
+* Get [`targets`](https://github.com/ropensci/targets):
+
+
+```r
+install.packages("remotes")
+remotes::install_github("ropensci/targets")
+```
+
+* Tutorial materials: &lt;https://github.com/wlandau/targets-tutorial&gt;
+* Development repository: &lt;https://github.com/ropensci/targets&gt;
+* Full user manual: &lt;https://books.ropensci.org/targets/&gt;
+* Reference website: &lt;https://docs.ropensci.org/targets/&gt;
+
+* These slides: &lt;https://github.com/NERC-CEH/targets_demo&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

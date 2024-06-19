@@ -1,10 +1,11 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|9c29d6eef477719f|||||||||||||||
+.Random.seed|object|652cf851197fd171|||||||||||||||
 add_things|function|04ba58d2d1d7e230|||||||||||||||
-data|stem|8d959535952bfd3a|4525b922227c51ac|9d9c62d571f3e690|-2078757027||t19794.5069323803s|659ddc44026aa935|1548|rds|local|vector|||0.17||
-file|stem|7799ac75e31df2c9|0d4b7516032e01d0|ef46db3751d8e999|-1629806240|data.csv|t19682.5486699097s|cc9e8fe371a7d265|3871|file|local|vector|||0.44|package ggplot2 was built under R version 4.3.3|
-fit_model|function|61106b8cbdd5bc7d|||||||||||||||
-get_data|function|31b527e9d7a4e301|||||||||||||||
-model|stem|dd07b7ec406d4ace|f3249b4ecf290e96|e7e5fcfcc0c6c972|1623637644||t19794.5069329226s|1eaa52c6e32a7b9e|113|rds|local|vector|||0.01||
-plot|stem|058b2ed076ced2a1|1239c97928298b18|b3cd48882d302612|-476444806||t19794.510539967s|2a63614b5764a11c|94615|rds|local|vector|||0.02||
-plot_model|function|9d59031dffad0d19|||||||||||||||
+data|stem|a8efe859d25c7640|24190b3dd2c05921|3f6cae22f78d438d|33550471||t19893.4847767421s|94a13266e6d4f70d|1552|rds|local|vector|||0.04||
+file|stem|83fa52ae778a117e|78ba1f949d516b2f|2c530c1562a7fbd1|1735323524|data.csv|t19893.4546828214s|88d5f75410ab2583|3871|file|local|vector|||0||
+filename|stem|3eb3c1b1f067da6b|78ba1f949d516b2f|2c530c1562a7fbd1|-1626168688|data.csv|t19893.4847179305s|88d5f75410ab2583|3871|file|local|vector|||0||
+fit_model|function|a02f55ddf92c55fd|||||||||||||||
+get_data|function|78f0c80ef747c86f|||||||||||||||
+model|stem|0b26da0e70684f68|122b7dd8ec340fb3|a7ec2ec4cc4c370a|808688450||t19893.4786771839s|f2de2469be356334|110|rds|local|vector|||0||
+plot|stem|68b91b605b0b6280|e9da12e55abf4572|4297634676e521b6|874984291||t19893.4786780961s|7b3480bd1a407de3|94685|rds|local|vector|||0.01||
+plot_model|function|349fec129265d099|||||||||||||||
